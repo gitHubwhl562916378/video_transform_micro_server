@@ -1,4 +1,3 @@
-#define __STDC_CONSTANT_MACROS
 #include <iostream>
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -7,6 +6,7 @@
 #include "http_server.h"
 #include "factory.h"
 #include "transform_stream_impl.h"
+#define VERSION "V1.0"
 
 std::mutex mtx;
 std::condition_variable cv_;
@@ -42,7 +42,7 @@ int main()
         HttpServer server("http://0.0.0.0:" + configuration->getString("http_server[@port]"), configuration->getInt("http_server[@threads]"));
         server.SetTransformApi(std::shared_ptr<TransformStreamApi>(handle));
         server.Accept().wait();
-        spdlog::info("Microsvc is listening request on {}", server.EndPoint());
+        spdlog::info("Video Transform Micro Server {} start listen on {}", VERSION, server.EndPoint());
 
         signal(SIGINT, handleUserInterrupt);
         std::unique_lock<std::mutex> lock(mtx);
