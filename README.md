@@ -1,7 +1,7 @@
 # Video_Transform_Micro_Server
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 
-  一个实现视频源转换的微服务。 如果输出地址设置为路径，则转出的文件在服务端访路径下;如果输出地址设置为流媒体地址，则转换为网络流；  
+一个实现视频源转换的微服务。 如果输出地址设置为路径，则转出的文件在服务端访路径下;如果输出地址设置为流媒体地址，则转换为网络流；  
 最终输出文件都以http返回
 
 # How To Build
@@ -17,9 +17,19 @@
 2. `cd build`
 3. `cmake .. && make`
 
+# Run
+> `./video_transform_micro_server` 确定配置文件config.xml在同一目录
+> transform_video
+
+  方法 | 地址 | URL参数 ｜ 返回
+  ---- | ---- | ---- | ----
+  GET  | /rest/api/v1/transform_stream | url=输入源 | {code: 200, message: "successful", data: "rtmp://10.10.1.88/live/1"}
+  GET  | /rest/api/v1/stop | url=输入源 | {code: 200, message: "successful"}
+  
 # Other
 ## version
 + v1.0
+
 ## Update
 
 ### [2020/7/14]
