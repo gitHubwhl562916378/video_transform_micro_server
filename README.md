@@ -21,7 +21,7 @@
 > `./video_transform_micro_server` 确定配置文件config.xml在同一目录
 > transform_video
 
-  方法 | 地址 | URL参数 ｜ 返回
+  方法 | 地址 | URL参数 | 返回
   ---- | ---- | ---- | ----
   GET  | /rest/api/v1/transform_stream | url=rtsp://192.168.2.66/video.avi | {code: 200, message: "successful", data: "rtmp://10.10.1.88/live/1"}  
   GET  | /rest/api/v1/stop | url=rtsp://192.168.2.66/video.avi | {code: 200, message: "successful"}  
