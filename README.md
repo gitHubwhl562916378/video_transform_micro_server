@@ -12,3 +12,9 @@
 1. `mkdir build`
 2. `cd build`
 3. `cmake .. && make`
+
+# Other
+## version
++ v1.0
+## Update
+[2020/7/14] 主要功能完成，能完成流转换。通过配置文件读取，实现ffmpeg的转换方法
