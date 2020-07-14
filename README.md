@@ -23,8 +23,8 @@
 
   方法 | 地址 | URL参数 ｜ 返回
   ---- | ---- | ---- | ----
-  GET  | /rest/api/v1/transform_stream | url=输入源 | {code: 200, message: "successful", data: "rtmp://10.10.1.88/live/1"}  
-  GET  | /rest/api/v1/stop | url=输入源 | {code: 200, message: "successful"}  
+  GET  | /rest/api/v1/transform_stream | url=rtsp://192.168.2.66/video.avi | {code: 200, message: "successful", data: "rtmp://10.10.1.88/live/1"}  
+  GET  | /rest/api/v1/stop | url=rtsp://192.168.2.66/video.avi | {code: 200, message: "successful"}  
 
 # Other
 ## version
