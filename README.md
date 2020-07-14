@@ -7,9 +7,10 @@
 # How To Build
 ## 安装环境
 >+ spdlog [https://github.com/gabime/spdlog](https://github.com/gabime/spdlog)
->+ libavcodec 58.22.101以上#nbsplibavformat 58.17.101以上#nbsplibavutil 56.19.100以上
+>+ libavcodec 58.22.101以上; libavformat 58.17.101以上; libavutil 56.19.100以上
 >+ poco [https://github.com/pocoproject/poco](https://github.com/pocoproject/poco) 51以上
 >+ cpprestsdk [https://github.com/microsoft/cpprestsdk](https://github.com/microsoft/cpprestsdk) 2.10以上
+
 ## 编译
 1. `mkdir build`
 2. `cd build`
@@ -17,8 +18,8 @@
 
 # Other
 ## version
-+ v1.0
-## Update
++ v1.0  
+## Update  
 ### [2020/7/14]
 1. 主要功能完成，使用ffmpeg完成流转换。
 2. 集成到http服务
