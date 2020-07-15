@@ -233,6 +233,8 @@ void HttpServer::HandStart(http_request message)
                 response["message"] = json::value::string("url not find");
                 message.reply(status_codes::NotFound, response);
             }
+            std::string input_url = iter->second;
+            
             iter = result.find("auto-replay");
             bool auto_replay = false;
             if(iter != result.end())
@@ -240,7 +242,6 @@ void HttpServer::HandStart(http_request message)
                 auto_replay = true;
             }
 
-            std::string input_url = iter->second;
             std::string out_url, err;
             transform_api_->start(input_url, out_url, [&, message, input_url, auto_replay](int code, const std::string out_url, const std::string &err) -> void {
                 if (code == -1)
@@ -272,7 +273,7 @@ void HttpServer::HandStart(http_request message)
         }
         catch (const std::exception &e)
         {
-            spdlog::error("HttpServer::HandTest exception {}", e.what());
+            spdlog::error("HttpServer::HandStart exception {}", e.what());
         }
     });
 }

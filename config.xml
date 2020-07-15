@@ -1,6 +1,7 @@
 <video_transform_micro_server>
     <http_server port="6605" threads="10"/>
-    <video_transform media_server="rtmp://10.10.1.88/live" transoform_use="ffmpeg"/> <!-- only support 'ffmpeg' -->>
+    <video_transform media_server="rtmp://10.10.1.88/live" transoform_use="ffmpeg" oformat="flv"/> <!-- transoform_use only support 'ffmpeg'\
+    oformat flv-rtmp; .... -->
     <log> 
         <console level="0"/><!-- 0-trace debug-1 info-2 warn-3 error-4 critical-5 off-6 -->
         <file level="0" update_h="2" update_m="30"/>

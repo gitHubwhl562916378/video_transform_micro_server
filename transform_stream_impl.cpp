@@ -23,6 +23,7 @@ std::string TransformStreamFFmpeg::dstUrl() const
 	return output_url_;
 }
 
+extern std::string g_oformat;
 void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string rtmp_url, const std::function<void(int, const std::string out_url, const std::string &err)> call_back)
 {
 	AVFormatContext *format_ctx;
@@ -82,7 +83,7 @@ void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string 
 		av_dump_format(format_ctx, 0, rtsp_url.c_str(), 0);
 		spdlog::trace("prepare output context {}", rtsp_url);
 
-		ret = avformat_alloc_output_context2(&output_format, NULL, "flv", rtmp_url.c_str());
+		ret = avformat_alloc_output_context2(&output_format, NULL, g_oformat.data(), rtmp_url.c_str());
 		//avformat_alloc_output_context2(&output_format, NULL, "h264", rtmp_url.c_str());
 		if (ret != 0)
 		{

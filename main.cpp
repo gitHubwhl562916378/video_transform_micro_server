@@ -18,6 +18,7 @@ void handleUserInterrupt(int signal){
     }
 }
 std::string g_config_file = "config.xml";
+std::string g_oformat;
 
 int main()
 {
@@ -38,6 +39,7 @@ int main()
         
         TransformStreamApi *handle = factory.CreateObject(configuration->getString("video_transform[@transoform_use]"));
         handle->set_media_host(configuration->getString("video_transform[@media_server]"));
+        g_oformat = configuration->getString("video_transform[@oformat]");
 
         HttpServer server("http://0.0.0.0:" + configuration->getString("http_server[@port]"), configuration->getInt("http_server[@threads]"));
         server.SetTransformApi(std::shared_ptr<TransformStreamApi>(handle));
