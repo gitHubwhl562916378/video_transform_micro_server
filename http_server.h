@@ -34,7 +34,7 @@ private:
     boost::asio::io_service::work io_work_;
     std::vector<std::thread> threads_vec_;
     std::shared_ptr<TransformStreamApi> transform_api_;
-    std::string dead_url_;
+    std::pair<std::string, std::string> dead_video_param_;
     std::mutex url_mtx_;
     std::condition_variable cv_;
     std::atomic_bool quit_;

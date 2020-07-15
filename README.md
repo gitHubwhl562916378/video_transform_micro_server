@@ -24,7 +24,7 @@
   方法 | 地址 | URL参数 | 返回
   ---- | ---- | ---- | ----
   GET  | /rest/api/v1/transform_stream | url=rtsp://192.168.2.66/video.avi | {code: 200, message: "successful", data: "rtmp://10.10.1.88/live/1"}  
-  GET  | /rest/api/v1/stop | url=rtsp://192.168.2.66/video.avi | {code: 200, message: "successful"}  
+  GET  | /rest/api/v1/stop | url=rtsp://192.168.2.66/video.avi&auto-replay=true | {code: 200, message: "successful"}  
 
 # Other
 ## version
@@ -36,3 +36,6 @@
 1. 主要功能完成，使用ffmpeg完成流转换。
 2. 集成到http服务
 3. 编写配置文件
+
+### [2020/7/14]
+1. 添加自动重连参数，默认不启用，当启用时；视频播放结束后自动开始重播放，输出地址不变。第一次播放失败的，在启用情况下不会重播放；第一次播放成功的，后面不管是播放结束还是其它错误都会重播放

@@ -23,7 +23,7 @@ std::string TransformStreamFFmpeg::dstUrl() const
 	return output_url_;
 }
 
-void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string rtmp_url, const std::function<void(int, const std::string &err)> call_back)
+void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string rtmp_url, const std::function<void(int, const std::string out_url, const std::string &err)> call_back)
 {
 	AVFormatContext *format_ctx;
 	AVFormatContext *output_format = NULL;
@@ -62,7 +62,7 @@ void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string 
 			erroStr += std::string(av_err2str(ret));
 			spdlog::error("{} {}", rtsp_url, erroStr);
 			avformat_free_context(format_ctx);
-			call_back(-1, erroStr);
+			call_back(-1, rtmp_url, erroStr);
 			return;
 		}
 
@@ -75,7 +75,7 @@ void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string 
 			spdlog::error("{} {}", rtsp_url, erroStr);
 			avformat_free_context(format_ctx);
 			avformat_close_input(&format_ctx);
-			call_back(-1, erroStr);
+			call_back(-1, rtmp_url, erroStr);
 			return;
 		}
 
@@ -92,7 +92,7 @@ void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string 
 			avformat_free_context(format_ctx);
 			avformat_free_context(output_format);
 			avformat_close_input(&format_ctx);
-			call_back(-1, erroStr);
+			call_back(-1, rtmp_url, erroStr);
 			return;
 		}
 
@@ -112,7 +112,7 @@ void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string 
 				avformat_free_context(format_ctx);
 				avformat_free_context(output_format);
 				avformat_close_input(&format_ctx);
-				call_back(-1, erroStr);
+				call_back(-1, rtmp_url, erroStr);
 				return;
 			}
 
@@ -132,7 +132,7 @@ void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string 
 				avformat_free_context(format_ctx);
 				avformat_free_context(output_format);
 				avformat_close_input(&format_ctx);
-				call_back(-1, erroStr);
+				call_back(-1, rtmp_url, erroStr);
 				return;
 			}
 		}
@@ -147,7 +147,7 @@ void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string 
 			avformat_free_context(output_format);
 			avformat_close_input(&format_ctx);
 			avio_close(output_format->pb);
-			call_back(-1, erroStr);
+			call_back(-1, rtmp_url, erroStr);
 			return;
 		}
 
@@ -166,7 +166,7 @@ void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string 
 			{
 				if (is_first_frame_)
 				{
-					call_back(0, rtmp_url);
+					call_back(0, rtmp_url, "successful");
 					is_first_frame_ = false;
 				}
 			}
@@ -212,20 +212,24 @@ void TransformStreamFFmpeg::start(const std::string rtsp_url, const std::string 
 	avformat_free_context(format_ctx);
 
 	avformat_network_deinit();
-	if(running_.load())
+	if (running_.load())
 	{
-		if(ret != AVERROR_EOF)
+		if (ret != AVERROR_EOF)
 		{
-			if(is_first_frame_)
+			if (is_first_frame_)
 			{
 				erroStr = "av_read_frame failed error: ";
 				erroStr += av_err2str(ret);
-				call_back(-1, erroStr);
-			}else{
-				call_back(-2, erroStr);
+				call_back(-1, rtmp_url, erroStr);
 			}
-		}else{
-			call_back(-2, erroStr);
+			else
+			{
+				call_back(-2, rtmp_url, erroStr);
+			}
+		}
+		else
+		{
+			call_back(-2, rtmp_url, erroStr);
 		}
 	}
 
@@ -247,21 +251,23 @@ void TransformStream::set_media_host(const std::string &host_addr)
 	host_addr_ = host_addr;
 }
 
-void TransformStream::start(const std::string &input_url, std::string &output_url, const std::function<void(int, const std::string &err)> call_back)
+void TransformStream::start(const std::string &input_url, std::string &output_url, const std::function<void(int, const std::string out_url, const std::string &err)> call_back)
 {
 	std::lock_guard<std::mutex> lock(mtx_);
 	auto iter = transforms_.find(input_url);
 	if (iter != transforms_.end())
 	{
-		std::string err("current transform existsing out_url: ");
-		err += iter->second.first->dstUrl();
-		spdlog::warn("TransformStream::start {}", err);
-		call_back(0, iter->second.first->dstUrl());
+		std::string err("current transform existsing");
+		spdlog::warn("TransformStream::start {} {}", err, iter->second.first->dstUrl());
+		call_back(0, iter->second.first->dstUrl(), err);
 		return;
 	}
 
 	std::shared_ptr<TransformStreamFFmpeg> new_obj = std::make_shared<TransformStreamFFmpeg>();
-	output_url = host_addr_ + "/" + std::to_string(index_++);
+	if (output_url.empty())
+	{
+		output_url = host_addr_ + "/" + std::to_string(index_++);
+	}
 	std::shared_ptr<std::thread> new_thr = std::make_shared<std::thread>(std::bind(&TransformStreamFFmpeg::start, new_obj.get(), input_url, output_url, call_back));
 	bool code = transforms_.insert(std::make_pair(input_url, std::make_pair(new_obj, new_thr))).second;
 	if (!code)

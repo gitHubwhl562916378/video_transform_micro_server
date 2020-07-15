@@ -13,7 +13,7 @@ public:
     ~TransformStreamFFmpeg();
     std::string src() const;
     std::string dstUrl() const;
-    void start(const std::string input_url, const std::string output_url, const std::function<void(int, const std::string &err)> call_back);
+    void start(const std::string input_url, const std::string output_url, const std::function<void(int, const std::string out_url, const std::string &err)> call_back);
     bool stop();
 
 private:
@@ -27,7 +27,7 @@ class TransformStream : public TransformStreamApi
 public:
     TransformStream();
     void set_media_host(const std::string &host_addr) override;
-    void start(const std::string &input_url, std::string &output_url, const std::function<void(int, const std::string &err)> call_back) override;
+    void start(const std::string &input_url, std::string &output_url, const std::function<void(int, const std::string out_url, const std::string &err)> call_back) override;
     void stop(const std::string &input_url, std::string &err) override;
 
 private:

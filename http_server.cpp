@@ -8,6 +8,7 @@
 #include "Poco/StreamCopier.h"
 #include "http_server.h"
 #include "transform_stream_api.h"
+#include "timercpp.h"
 
 namespace Poco
 {
@@ -232,10 +233,16 @@ void HttpServer::HandStart(http_request message)
                 response["message"] = json::value::string("url not find");
                 message.reply(status_codes::NotFound, response);
             }
+            iter = result.find("auto-replay");
+            bool auto_replay = false;
+            if(iter != result.end())
+            {
+                auto_replay = true;
+            }
 
             std::string input_url = iter->second;
             std::string out_url, err;
-            transform_api_->start(input_url, out_url, [&, message, input_url](int code, const std::string &err) -> void {
+            transform_api_->start(input_url, out_url, [&, message, input_url, auto_replay](int code, const std::string out_url, const std::string &err) -> void {
                 if (code == -1)
                 {
                     auto response = json::value::object();
@@ -244,21 +251,21 @@ void HttpServer::HandStart(http_request message)
                     message.reply(status_codes::OK, response);
 
                     std::lock_guard<std::mutex> lock(url_mtx_);
-                    dead_url_ = input_url;
+                    dead_video_param_ = std::make_pair(input_url, "");
                     cv_.notify_one();
                 }
                 else if (code == 0)
                 {
                     auto response = json::value::object();
                     response["status"] = 200;
-                    response["message"] = json::value::string("successful");
-                    response["data"] = json::value::string(err);
+                    response["message"] = json::value::string(err);
+                    response["data"] = json::value::string(out_url);
                     message.reply(status_codes::OK, response);
                 }
                 else if (code == -2)
                 {
                     std::lock_guard<std::mutex> lock(url_mtx_);
-                    dead_url_ = input_url;
+                    dead_video_param_ = std::make_pair(input_url, auto_replay ? out_url : "");
                     cv_.notify_one();
                 }
             });
@@ -289,11 +296,13 @@ void HttpServer::HandStop(http_request message)
             std::string erroStr;
             transform_api_->stop(input_url, erroStr);
             auto response = json::value::object();
-            if(erroStr.empty())
+            if (erroStr.empty())
             {
                 response["status"] = 200;
                 response["message"] = json::value::string("successful");
-            }else{
+            }
+            else
+            {
                 response["status"] = 20001;
                 response["message"] = json::value::string(erroStr);
             }
@@ -345,9 +354,32 @@ void HttpServer::ClearDeadStream()
     while (!quit_.load())
     {
         std::unique_lock<std::mutex> lock(url_mtx_);
-        cv_.wait(lock, [=]{return !dead_url_.empty();});
+        cv_.wait(lock, [=] { return !dead_video_param_.first.empty(); });
         std::string error;
-        transform_api_->stop(dead_url_, error);
-        dead_url_.clear();
+        transform_api_->stop(dead_video_param_.first, error);
+        if (!dead_video_param_.second.empty())
+        {
+            std::pair<std::string, std::string> temp = dead_video_param_;
+            Timer *t = new Timer;
+            t->setTimeout([&, temp, t] {
+                std::string out_url = temp.second;
+                transform_api_->start(temp.first, out_url, [&, temp](int code, const std::string out_url, const std::string &err) {
+                    if (code == -2)
+                    {
+                        std::lock_guard<std::mutex> lock(url_mtx_);
+                        dead_video_param_ = temp;
+                        cv_.notify_one();
+                    }
+                    else if (code == -1)
+                    {
+                        std::lock_guard<std::mutex> lock(url_mtx_);
+                        dead_video_param_ = temp;
+                        cv_.notify_one();
+                    }
+                });
+                delete t;
+            },5000);
+        }
+        dead_video_param_ = std::make_pair("", "");
     }
 }
