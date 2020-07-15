@@ -1,8 +1,7 @@
 # Video_Transform_Micro_Server
 ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
 
-一个实现视频源转换的微服务。 如果输出地址设置为路径，则转出的文件在服务端访路径下;如果输出地址设置为流媒体地址，则转换为网络流；  
-最终输出文件都以http返回
+一个实现视频源转换的微服务。 如果输出地址设置为路径，则转出的文件在服务端访路径下;如果输出地址设置为流媒体地址，则转换为网络流。最终输出文件都以http返回
 
 # How To Build
 ## 环境
@@ -18,8 +17,8 @@
 3. `cmake .. && make`
 
 # Run
-> `./video_transform_micro_server` 确定配置文件config.xml在同一目录
-> 端口默认6605,可以配置文件中配置
+> `./video_transform_micro_server` 确定配置文件config.xml在同一目录  
+> 端口默认6605,可以配置文件中配置  
 > transform_video
 
   方法 | 地址 | URL参数 | 返回
